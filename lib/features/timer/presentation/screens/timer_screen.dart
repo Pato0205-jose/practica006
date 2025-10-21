@@ -33,64 +33,71 @@ class _TimerView extends StatelessWidget {
           const Background(),
           Positioned.fill(
             child: SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 100.0),
-                    child: Center(
-                      child: BlocBuilder<TimerBloc, TimerState>(
-                        builder: (context, state) {
-                          final String minutesStr = ((state.duration / 60) % 60)
-                              .floor()
-                              .toString()
-                              .padLeft(2, '0');
-                          final String secondsStr = (state.duration % 60)
-                              .floor()
-                              .toString()
-                              .padLeft(2, '0');
-                          return Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              SizedBox(
-                                width: 300,
-                                height: 300,
-                                child: CircularProgressIndicator(
-                                  value: state.initialDuration > 0
-                                      ? state.duration / state.initialDuration
-                                      : 1.0,
-                                  strokeWidth: 10,
-                                  backgroundColor: Colors.grey.shade300,
-                                  valueColor: const AlwaysStoppedAnimation<Color>(
-                                    Colors.white,
+              child: OrientationBuilder(
+                builder: (context, orientation) {
+                  return Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                            vertical: orientation == Orientation.portrait
+                                ? 100.0
+                                : 20.0), // Reduced padding for landscape
+                        child: Center(
+                          child: BlocBuilder<TimerBloc, TimerState>(
+                            builder: (context, state) {
+                              final String minutesStr = ((state.duration / 60) % 60)
+                                  .floor()
+                                  .toString()
+                                  .padLeft(2, '0');
+                              final String secondsStr = (state.duration % 60)
+                                  .floor()
+                                  .toString()
+                                  .padLeft(2, '0');
+                              return Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  SizedBox(
+                                    width: 300,
+                                    height: 300,
+                                    child: CircularProgressIndicator(
+                                      value: state.initialDuration > 0
+                                          ? state.duration / state.initialDuration
+                                          : 1.0,
+                                      strokeWidth: 10,
+                                      backgroundColor: Colors.grey.shade300,
+                                      valueColor: const AlwaysStoppedAnimation<Color>(
+                                        Colors.white,
+                                      ),
+                                    ),
                                   ),
-                                ),
-                              ),
-                              GestureDetector(
-                                onTap: () {
-                                  if (state is TimerInitial) {
-                                    _showDurationDialog(context, state.duration);
-                                  }
-                                },
-                                child: Text(
-                                  '$minutesStr:$secondsStr',
-                                  style: const TextStyle(
-                                    fontSize: 60,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
+                                  GestureDetector(
+                                    onTap: () {
+                                      if (state is TimerInitial) {
+                                        _showDurationDialog(context, state.duration);
+                                      }
+                                    },
+                                    child: Text(
+                                      '$minutesStr:$secondsStr',
+                                      style: const TextStyle(
+                                        fontSize: 60,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
                                   ),
-                                ),
-                              ),
-                            ],
-                          );
-                        },
+                                ],
+                              );
+                            },
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  const ActionsButtons(),
-                  const _LapsView(),
-                ],
+                      const ActionsButtons(),
+                      const _LapsView(),
+                    ],
+                  );
+                },
               ),
             ),
           ),
@@ -151,10 +158,11 @@ class _LapsView extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<TimerBloc, TimerState>(
       builder: (context, state) {
-        if (state is! TimerTicking || state.laps.isEmpty) {
+        if (state.laps.isEmpty) { // Modified condition
           return const SizedBox.shrink();
         }
-        return Expanded(
+        return SizedBox(
+          height: 150.0,
           child: ListView.builder(
             itemCount: state.laps.length,
             itemBuilder: (context, index) {

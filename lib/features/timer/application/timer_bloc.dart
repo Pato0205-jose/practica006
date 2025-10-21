@@ -35,7 +35,7 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
   }
 
   void _onStarted(TimerStarted event, Emitter<TimerState> emit) {
-    emit(TimerTicking(event.duration, event.duration, const []));
+    emit(TimerTicking(event.duration, event.duration, event.laps));
     _tickerSubscription?.cancel();
     _tickerSubscription = _timerRepository
         .ticker()
@@ -47,21 +47,21 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
       emit(TimerTicking(event.duration, state.initialDuration, state.laps));
     } else {
       _audioPlayer.play(AssetSource('audio/gota.mp3'));
-      emit(const TimerFinished());
+      emit(TimerFinished(laps: state.laps));
     }
   }
 
   void _onPaused(TimerPaused event, Emitter<TimerState> emit) {
     if (state is TimerTicking) {
       _tickerSubscription?.pause();
-      emit(TimerInitial(state.duration));
+      emit(TimerInitial(state.duration, laps: state.laps));
     }
   }
 
   void _onReset(TimerReset event, Emitter<TimerState> emit) {
     _audioPlayer.stop();
     _tickerSubscription?.cancel();
-    emit(const TimerInitial(_duration));
+    emit(const TimerInitial(_duration, laps: []));
   }
 
   void _onLapPressed(TimerLapPressed event, Emitter<TimerState> emit) {
